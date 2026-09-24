@@ -1,9 +1,10 @@
 from typing import Tuple, Callable
 from enum import IntEnum
+from time import sleep
 
 class InputCodes(IntEnum):
-    ASK = 0
-    RETRY = 1
+    ASK = 0;
+    RETRY = 1;
 
 class TimeMetaData():
     nb: int = 0;
@@ -14,7 +15,7 @@ class TimeMetaData():
         
 class Seconds(TimeMetaData):
     nb: int = 60;
-    sec_change_rate: int = 1;   
+    sec_change_rate: int = 1; 
 
 class Minute(TimeMetaData):
     nb: int = 60;
@@ -23,29 +24,41 @@ class Minute(TimeMetaData):
 class Hour(TimeMetaData):
     nb: int = 24;
     sec_change_rate: int = Minute.nb * Seconds.nb;
+    
+class Day(TimeMetaData):
+    nb: int = 31;
+    sec_change_rate: int = Hour.sec_change_rate * Hour.nb;
 
-TIME_META_DATA_STRUCT: TimeMetaData = (Hour(), Minute(), Seconds())
+TIME_META_DATA_STRUCT: TimeMetaData = (Day(), Hour(), Minute(), Seconds())
 NB_ELT_FORMAT: int = len(TIME_META_DATA_STRUCT);
+
 
 data_time = int;
 #<=== I/O ===>
+OUTPUT_TIME_META_DATA_STRUCT: Tuple[str] = ("DD", "HH", "MM", "SS");
+OUTPUT_FORMAT: str = ":".join(OUTPUT_TIME_META_DATA_STRUCT);
+
 def get_terminal_input(code: InputCodes) -> str:
-    msg: Tuple[str] = ("Entrez une date au format HH:MM:SS: \n", "Assurez vous d'entrez une date au format HH:MM:SS: \n")
+    msg: Tuple[str] = (f"Entrez une date au format {OUTPUT_FORMAT} : \n", f"Assurez vous d'entrez une date au format {OUTPUT_FORMAT}: \n")
     return input(msg[code]);
 
-def show_terminal_data_time(data: data_time) -> None:
+def format_terminal_data_time(data: data_time) -> str:
     msg: str = "Time: ";
-    for i in range(NB_ELT_FORMAT -1):
+    for i in range(NB_ELT_FORMAT):
         change_rate: int = TIME_META_DATA_STRUCT[i].sec_change_rate;
         
         msg += str(data // change_rate);
         data %= change_rate;
         msg += ':';
     
-    print(msg[:-1]);
+    return msg[:-1];
+    
+def print_terminal(data: str,  end_char: str = "\n"):
+    print(data, end=end_char);
 
 input_func: Callable[[InputCodes], str] = get_terminal_input;
-output_func: Callable[[data_time], None] = show_terminal_data_time;
+output_format_data_time: Callable[[data_time], str] = format_terminal_data_time;
+output_func: Callable[[data_time], None] = print_terminal;
 #<===/===>
 #<=== Utils ===>
 def try_convert_int(value) -> Tuple[bool, int | None]:
@@ -112,7 +125,33 @@ def add_minute(data: data_time, nb: int) -> data_time:
 def add_hour(data: data_time, nb: int) -> data_time:  
     return data + nb * Hour.sec_change_rate;
 
-t = get_data_time_input();
-t = add_minute(t, 1);
+def add_day(data: data_time, nb: int) -> data_time:  
+    return data + nb * Day.sec_change_rate;
 
-output_func(t);
+
+#<=== Exo ===>
+class ExoFuncIds(IntEnum):
+    TEST_SCRIPT = 0;
+    TIMER = 1;
+    
+def test_script():
+    t = get_data_time_input();
+    t = add_day(t, 48);
+
+    output_func(output_format_data_time(t));
+    
+def timer_exo():
+    output_func("<===/===>");
+    t = get_data_time_input();
+    while t > 0:    
+        t = add_sec(t, -1);
+        output_func(output_format_data_time(t), '\r' * (t > 0) + '\n' * (t <= 0)); 
+        sleep(1);
+    
+    output_func("<===/===>");
+
+EXO_FUNC: Tuple[Callable[[None], None]] = (test_script, timer_exo)
+#<===/===>
+
+if __name__ == "__main__":
+    EXO_FUNC[ExoFuncIds.TIMER]();
