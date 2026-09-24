@@ -46,8 +46,9 @@ def format_terminal_data_time(data: data_time) -> str:
     msg: str = "Time: ";
     for i in range(NB_ELT_FORMAT):
         change_rate: int = TIME_META_DATA_STRUCT[i].sec_change_rate;
+        temp_str: str = str(data // change_rate);
         
-        msg += str(data // change_rate);
+        msg += '0' + temp_str if len(temp_str) == 1 else temp_str;
         data %= change_rate;
         msg += ':';
     
@@ -145,7 +146,7 @@ def timer_exo():
     t = get_data_time_input();
     while t > 0:    
         t = add_sec(t, -1);
-        output_func(output_format_data_time(t), '\r' * (t > 0) + '\n' * (t <= 0)); 
+        output_func(output_format_data_time(t), '\r' if t > 0 else '\n'); 
         sleep(1);
     
     output_func("<===/===>");
