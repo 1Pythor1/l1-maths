@@ -78,18 +78,18 @@ def try_convert_data_time(data_str: str, ids: int) -> Tuple[bool, data_time | No
 def try_convert_data_time_input(user_input: str) -> Tuple[bool, data_time | None]:
     user_input = user_input.split(":");
     user_data_time: data_time = 0;
+    nb_digit: int = len(TIME_META_DATA_STRUCT);
     
-    if(len(user_input) != 3):
+    if(len(user_input) != nb_digit):
         return (False, None);
     
     data: Tuple[bool, int | None];
-    for i in range(len(TIME_META_DATA_STRUCT)):
+    for i in range(nb_digit):
         data = try_convert_data_time(user_input[i], i);
         if(not data[0]):
             return (False, None);
         
         user_data_time += data[1];
-    
     
     return (True, user_data_time)
 #<===/===>
