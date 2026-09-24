@@ -25,6 +25,7 @@ class Hour(TimeMetaData):
     sec_change_rate: int = Minute.nb * Seconds.nb;
 
 TIME_META_DATA_STRUCT: TimeMetaData = (Hour(), Minute(), Seconds())
+NB_ELT_FORMAT: int = len(TIME_META_DATA_STRUCT);
 
 data_time = int;
 #<=== I/O ===>
@@ -33,16 +34,15 @@ def get_terminal_input(code: InputCodes) -> str:
     return input(msg[code]);
 
 def show_terminal_data_time(data: data_time) -> None:
+    msg: str = "Time: ";
+    for i in range(NB_ELT_FORMAT -1):
+        change_rate: int = TIME_META_DATA_STRUCT[i].sec_change_rate;
+        
+        msg += str(data // change_rate);
+        data %= change_rate;
+        msg += ':';
     
-    hour: int = data // Hour.sec_change_rate;
-    data = data % Hour.sec_change_rate;
-    
-    minute: int = data // Minute.sec_change_rate;
-    data = data % Minute.sec_change_rate
-    
-    sec: int = data;
-    
-    print(f"Time: {hour}:{minute}:{sec}");
+    print(msg[:-1]);
 
 input_func: Callable[[InputCodes], str] = get_terminal_input;
 output_func: Callable[[data_time], None] = show_terminal_data_time;
@@ -78,13 +78,12 @@ def try_convert_data_time(data_str: str, ids: int) -> Tuple[bool, data_time | No
 def try_convert_data_time_input(user_input: str) -> Tuple[bool, data_time | None]:
     user_input = user_input.split(":");
     user_data_time: data_time = 0;
-    nb_digit: int = len(TIME_META_DATA_STRUCT);
     
-    if(len(user_input) != nb_digit):
+    if(len(user_input) != NB_ELT_FORMAT):
         return (False, None);
     
     data: Tuple[bool, int | None];
-    for i in range(nb_digit):
+    for i in range(NB_ELT_FORMAT):
         data = try_convert_data_time(user_input[i], i);
         if(not data[0]):
             return (False, None);
